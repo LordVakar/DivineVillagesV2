@@ -1,0 +1,8 @@
+name: DivineVillages
+main: me.lordvakar.divinevillages.DivineVillages
+version: 1.0
+description: Divine Villages!
+author: LordVakar
+commands:
+   village:
+      description: Main DV command.
