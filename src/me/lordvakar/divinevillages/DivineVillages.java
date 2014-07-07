@@ -29,8 +29,10 @@ public class DivineVillages extends JavaPlugin
 	public void onEnable() {
 		pl = this;
 		config = pl.getConfig();
+	    log = getLogger();
 		registerEvents(this// , new
 		);
+		registerCommands();
 		
 		if (!folder.exists()) {
 			folder.mkdir();
@@ -97,4 +99,12 @@ public class DivineVillages extends JavaPlugin
 		 JavaPlugin plugin = (JavaPlugin) pl;
 		 return plugin;
 	 }
+	 
+/*	 public static void spreadPlayers(int centerx, int centerz, int min, int max, boolean team) {
+	        for (Player p : Bukkit.getOnlinePlayers()) {
+	            if (p !=null) {
+	                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "spreadplayers " + centerx + " " + centerz + " " + min + " " + max + " " + team + " " + p.getName());
+	            }
+	        }
+	    }*/
 }

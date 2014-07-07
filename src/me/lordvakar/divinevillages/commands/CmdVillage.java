@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 public class CmdVillage implements CommandExecutor{
 	
 	DivineVillages main;
-	String prefix = ChatColor.GOLD + "" + ChatColor.BOLD + "DivineVillages> ";
+	String prefix = ChatColor.GOLD + "" + ChatColor.BOLD + "DivineVillages> " + ChatColor.RESET + ChatColor.GOLD;
 	
 	public CmdVillage(DivineVillages plugin) {
     	this.main = (DivineVillages) DivineVillages.pl;
@@ -32,11 +32,14 @@ public class CmdVillage implements CommandExecutor{
 				Player p = (Player) sender;
 				if (args.length == 0) {
 					p.sendMessage(prefix + "Please specify some arguments!");
-				} 
+				}
 /*Create*/		else if (args[0].equalsIgnoreCase("create")) {
-					if (args[1] != null) {
+	 				if (args.length == 1) {
+	 					p.sendMessage(prefix + "Please specify some arguments!");
+	 				}
+	 				else if (args[1] != null) {
 						p.sendMessage(prefix + "You have created a new village named " + args[1] + "!");
-						Bukkit.broadcastMessage(prefix + p.getName() + "has created a new village named " + args[1]);
+						Bukkit.broadcastMessage(prefix + p.getName() + " has created a new village named " + args[1]);
 						VillageManager.getManager().createVillage(args[1], "", p);
 						p.sendMessage(prefix + "Please now do /village desc <villagename> <desc>!");
 					} else {
@@ -44,18 +47,21 @@ public class CmdVillage implements CommandExecutor{
 					}
 				}
 /*Desc*/		else if (args[0].equalsIgnoreCase("desc")) {
-					if (args[1] != null) {
+					if (args.length == 1) {
+						p.sendMessage(prefix + "Please specify some arguments!");
+					}
+					else if (args[1] != null) {
 						if (args[2] != null) {
 							if(VillageManager.getManager().getVillage(args[1]) != null) {
 						        String message = "";
-						        for(int i = 0; i < args.length; i++) {
+						        for(int i = 2; i < args.length; i++) {
 						            message += args[i];
 						            if(i < (args.length - 1)) message += " ";
 						        }
 						        
 								p.sendMessage(prefix + "You have set the description of your village to: " + message + "!");
 								Bukkit.broadcastMessage(prefix + p.getName() + "has set their village desc to: " + message);
-								VillageManager.getManager().getVillage(args[1]).setVillageDesc(args[2]);
+								VillageManager.getManager().getVillage(args[1]).setVillageDesc(message);
 						        
 								FileConfiguration fc = DivineVillages.villageConfig;
 								String path = "Villages." + args[1] + ".";

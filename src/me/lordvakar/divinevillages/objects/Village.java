@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 public class Village 
 {
-	public List<String> villageMembers = new ArrayList<String>();
+	public List<String> villageCitizens = new ArrayList<String>();
 	private String villageName;
 	private String villageDesc;
 	private Player villageLeader;
@@ -20,7 +20,8 @@ public class Village
 		this.villageLeader = villageLeader;
 		
 		VillageManager.villages.add(this);
-		villageMembers.add(villageLeader.getName());
+		villageCitizens.add(villageLeader.getName());
+		//Citizen.enlistCitizen(villageLeader);
 	}
 
 	public String getVillageName() {
@@ -46,4 +47,24 @@ public class Village
 	public void setVillageLeader(Player villageLeader) {
 		this.villageLeader = villageLeader;
 	}
+	
+	public boolean isVillageLeader(Player player) {
+		if(player.equals(villageLeader)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+/*    public static Citizen guessCitizen(String string) {
+        for(Citizen r : Citizens) {
+            if(r.getName().toLowerCase().startsWith(string.toLowerCase())) return r;
+        }
+        
+        return null;
+    }*/
+
+/*    public static List<String> getRegisteredCitizens() {
+        return villageCitizenst<String>();
+    }*/
 }

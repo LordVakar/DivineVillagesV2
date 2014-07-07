@@ -44,7 +44,7 @@ public class VillageManager
 		fc.set("Villages." + villageName, null);
 		String path = "Villages." + villageName + ".";
 		fc.set(path + "villageDesc", villageDesc);
-		fc.set(path + "villageLeader", villageLeader);
+		fc.set(path + "villageLeader", villageLeader.getName());
 		try {
 			fc.save(DivineVillages.villageFile);
 			fc.load(DivineVillages.villageFile);
