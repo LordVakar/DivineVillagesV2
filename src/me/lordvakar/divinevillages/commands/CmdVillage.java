@@ -38,10 +38,14 @@ public class CmdVillage implements CommandExecutor{
 	 					p.sendMessage(prefix + "Please specify some arguments!");
 	 				}
 	 				else if (args[1] != null) {
-						p.sendMessage(prefix + "You have created a new village named " + args[1] + "!");
-						Bukkit.broadcastMessage(prefix + p.getName() + " has created a new village named " + args[1]);
-						VillageManager.getManager().createVillage(args[1], "", p);
-						p.sendMessage(prefix + "Please now do /village desc <villagename> <desc>!");
+	 					if(!VillageManager.getManager().isInVillage(p)) {
+	 						p.sendMessage(prefix + "You have created a new village named " + args[1] + "!");
+	 						Bukkit.broadcastMessage(prefix + p.getName() + " has created a new village named " + args[1]);
+	 						VillageManager.getManager().createVillage(args[1], "", p);
+	 						p.sendMessage(prefix + "Please now do /village desc <villagename> <desc>!");
+	 					} else {
+							p.sendMessage(prefix + "You are already in a village!");
+	 					}
 					} else {
 						p.sendMessage(prefix + "Please specify the village name!");
 					}
@@ -52,40 +56,48 @@ public class CmdVillage implements CommandExecutor{
 					}
 					else if (args[1] != null) {
 						if (args[2] != null) {
-							if(VillageManager.getManager().getVillage(args[1]) != null) {
-						        String message = "";
-						        for(int i = 2; i < args.length; i++) {
-						            message += args[i];
-						            if(i < (args.length - 1)) message += " ";
-						        }
+		 					if(VillageManager.getManager().isInVillage(p)) {
+		 						if(VillageManager.getManager().getVillage(args[1]) != null) {
+			 						if(VillageManager.getManager().getVillage(args[1]).isVillageLeader(p)) {
+			 							String message = "";
+			 							for(int i = 2; i < args.length; i++) {
+			 								message += args[i];
+			 								if(i < (args.length - 1)) message += " ";
+			 							}
 						        
-								p.sendMessage(prefix + "You have set the description of your village to: " + message + "!");
-								Bukkit.broadcastMessage(prefix + p.getName() + "has set their village desc to: " + message);
-								VillageManager.getManager().getVillage(args[1]).setVillageDesc(message);
-						        
-								FileConfiguration fc = DivineVillages.villageConfig;
-								String path = "Villages." + args[1] + ".";
-								fc.set(path + "villageDesc", message);
-								try {
-									fc.save(DivineVillages.villageFile);
-									fc.load(DivineVillages.villageFile);
-								} catch (IOException e) {
-									e.printStackTrace();
-								} catch (InvalidConfigurationException e) {
-									e.printStackTrace();
-								}
-							} else {
-								p.sendMessage(prefix + "The village you specified doesn't exist!");
-							}
-						} else {
-							p.sendMessage(prefix + "Please specify the village desc!");
-						}
+			 							p.sendMessage(prefix + "You have set the description of your village to: " + message + "!");
+			 							Bukkit.broadcastMessage(prefix + p.getName() + "has set their village desc to: " + message);
+			 							VillageManager.getManager().getVillage(args[1]).setVillageDesc(message);
+			 							
+			 							FileConfiguration fc = DivineVillages.villageConfig;
+			 							String path = "Villages." + args[1] + ".";
+			 							fc.set(path + "villageDesc", message);
+			 							try {
+			 								fc.save(DivineVillages.villageFile);
+			 								fc.load(DivineVillages.villageFile);
+			 							} catch (IOException e) {
+			 								e.printStackTrace();
+			 							} catch (InvalidConfigurationException e) {
+			 								e.printStackTrace();
+			 							}
+			 					} else {
+			 						//Not leader messsage
+			 					}
+		 					} else {
+		 						p.sendMessage(prefix + "The village you specified doesn't exist!");
+		 					}
+		 				} else {
+							p.sendMessage(prefix + "You aren't in a village!");
+		 				}
 					} else {
-						p.sendMessage(prefix + "Please specify the village name!");
+						p.sendMessage(prefix + "Please specify the village desc!");
 					}
+				} else {
+					p.sendMessage(prefix + "Please specify the village name!");
 				}
 			}
 		}
-		return false;
+	}
+	return false;
 	}
 }

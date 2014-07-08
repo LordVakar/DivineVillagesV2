@@ -35,6 +35,15 @@ public class VillageManager
         return null;
     }
     
+    public static Village getPlayersVillage(Player player) {
+        if(player == null) return null;
+        for(Village v : villages) {
+            if(v.getVillageLeader() == null) continue;
+            if(v.isVillageLeader(player) || v.isVillageCitizen(player)) return v;
+        }
+        return null;
+    }
+    
     public void createVillage(String villageName, String villageDesc, Player villageLeader) {
     	
     	Village vil = new Village(villageName, villageDesc, villageLeader);
@@ -68,5 +77,14 @@ public class VillageManager
 		} catch (InvalidConfigurationException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    public boolean isInVillage(Player player) {
+        for(Village v : villages) {
+        	if(v.isVillageLeader(player) || v.isVillageCitizen(player)) {
+        		return true;
+        	}
+        }
+        return false;
     }
 }
