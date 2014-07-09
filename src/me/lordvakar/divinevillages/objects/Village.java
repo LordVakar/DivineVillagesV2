@@ -2,30 +2,36 @@ package me.lordvakar.divinevillages.objects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import me.lordvakar.divinevillages.managers.VillageManager;
 import me.lordvakar.divinevillages.util.Util;
 
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 public class Village 
 {
-	public static List<String> villageCitizens = new ArrayList<String>();
+	public static List<UUID> villageCitizens = new ArrayList<UUID>();
+	public static List<UUID> invitedPlayers = new ArrayList<UUID>();
 	private String villageName;
 	private String villageDesc;
+	private String villageCreationDate;
 	private Player villageLeader;
+	private Location villageSpawn;
 	private boolean open;
 	
 	public Village(String villageName, String villageDesc, Player villageLeader) {
 		this.villageName = villageName;
 		this.villageDesc = villageDesc;
 		this.villageLeader = villageLeader;
+		this.villageSpawn = villageLeader.getLocation(); //To Prevent NPEs
 		this.setOpen(true);
 		
 		VillageManager.villages.add(this);
-		villageCitizens.add(villageLeader.getName());
+		villageCitizens.add(villageLeader.getUniqueId());
 	}
 
 	public String getVillageName() {
@@ -68,21 +74,36 @@ public class Village
         return null;
     }*/
 
-	public List<String> getVillageCitizens() {
+	public List<UUID> getVillageCitizens() {
 		return villageCitizens;
 	}
 	
+	public void makeCitizen(Player player) {
+		villageCitizens.add(player.getUniqueId());
+		if(invitedPlayers.contains(player.getUniqueId())) {
+			invitedPlayers.remove(player.getUniqueId());
+		}
+	}
+	
+	public void addInvited(Player player) {
+		invitedPlayers.add(player.getUniqueId());
+	}
+	
+	public List<UUID> getInvitedPlayers() {
+		return invitedPlayers;
+	}
+
 	public boolean isVillageCitizen(Player player) {
-		if(villageCitizens.contains(player.getName())) {
+		if(villageCitizens.contains(player.getUniqueId().toString())) {
 			return true;
 		}
 		return false;
 	}
 	
-    public String inferCitizen(String string) {
-        for(String r: villageCitizens) {
-        	Player p = Util.getPlayer(r);
-            if(p.getName().toLowerCase().startsWith(string.toLowerCase())) return r;
+    public UUID inferCitizen(String uuid) {
+        for(UUID r: villageCitizens) {
+        	Player p = Util.getPlayerByUuid(r);
+            if(p.getUniqueId().toString().startsWith(uuid)) return r;
         }   
         return null;
     }
@@ -113,5 +134,27 @@ public class Village
 
 	public void setOpen(boolean open) {
 		this.open = open;
+	}
+
+	public String getVillageCreationDate() {
+		return villageCreationDate;
+	}
+
+	public void setVillageCreationDate(String villageCreationDate) {
+		this.villageCreationDate = villageCreationDate;
+	}
+
+	public Location getVillageSpawn() {
+		return villageSpawn;
+	}
+
+	public void setVillageSpawn(Location villageSpawn) {
+		this.villageSpawn = villageSpawn;
+	}
+	
+	public void messageAllCitizens(String message) {
+		for (UUID allP : villageCitizens) {
+			Util.getPlayer(allP).sendMessage(message);
+		}
 	}
 }
