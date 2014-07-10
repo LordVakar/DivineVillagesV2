@@ -2,12 +2,16 @@ package me.lordvakar.divinevillages.util;
 
 import java.util.UUID;
 
+import me.lordvakar.divinevillages.DivineVillages;
+
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class Util 
 {
+	private static JavaPlugin plugin = DivineVillages.getJavaPlugin();
 	
     public static boolean isPlayer(Object o) {
         return o instanceof Player;
@@ -32,4 +36,12 @@ public class Util
             }
 		return null;
     }
+    
+    public static void log(Object o) {
+        getPlugin().getLogger().info(o.toString());
+   	}
+
+	public static JavaPlugin getPlugin() {
+		return plugin;
+	}
 }

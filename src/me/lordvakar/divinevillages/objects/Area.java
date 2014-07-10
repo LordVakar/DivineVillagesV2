@@ -6,6 +6,7 @@ import org.bukkit.Location;
 
 public class Area 
 {
+	private int areaID;
 	private int x;
 	private int z;
 	private Village villageOwner;
@@ -14,14 +15,23 @@ public class Area
 	public static int areaSize = 16;
 	//public Date claimDate;
 
-	public Area(Location loc, Village villageOwner) {
+	public Area(Location loc, Village villageOwner, int areaID) {
 		this.x = loc.getChunk().getX();
 		this.z = loc.getChunk().getZ();
 		this.setVillageOwner(villageOwner);
 		this.worldName = loc.getWorld().getName();
 		this.claimed = true;
+		this.areaID = areaID;
 		
 		AreaManager.getManager().areas.add(this);
+	}
+	
+	public int getAreaID() {
+		return areaID;
+	}
+
+	public void setAreaID(int areaID) {
+		this.areaID = areaID;
 	}
 	
 	public int getX() {
