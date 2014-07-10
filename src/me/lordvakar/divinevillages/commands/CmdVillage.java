@@ -154,6 +154,47 @@ public class CmdVillage implements CommandExecutor{
 					}
 				}
 			}
+/*SetSpawn*/else if (args[0].equalsIgnoreCase("setspawn")) {
+				if(VillageManager.getManager().isInVillage(p)) {
+					Village vil = VillageManager.getManager().getPlayersVillage(p);
+					if(VillageManager.getManager().villageExists(vil.getVillageName())) {
+						if(vil.isVillageLeader(p)) {
+ 					    	File villageFile = new File("plugins/DivineVillages/Villages" + "/" + vil.getVillageName() + ".yml");
+ 					    	YamlConfiguration villageConfig = YamlConfiguration.loadConfiguration(villageFile);
+ 							String path = vil.getVillageName() + ".";
+							vil.setVillageSpawn(p.getLocation());
+							villageConfig.set(path + "villageSpawn", VillageManager.getManager().serializeLoc(p.getLocation()));
+							p.sendMessage(prefix + "You set the village spawn to your current location!");
+						} else {
+							p.sendMessage(prefix + "You are not the leader of your village!");
+						}
+					} else {
+						p.sendMessage(prefix + "You really shouldn't be getting this message!");
+						p.sendMessage(prefix + "If Vakar's if and elses fail then you'll get this message!");
+						p.sendMessage(prefix + "This means you're in a village but it doesn't exist! lel 1337699001");
+					}
+				} else {
+					p.sendMessage(prefix + "You aren't in a village!");
+				}
+			} else if (args[0].equalsIgnoreCase("name")) {
+				//FUCK YEA LETS RENAME SOME SHIT
+				//EDIT: That method was complicated and long to do this o.o
+				//EDIT: I could of done other things to rename, but I guess my way is efficient.
+				if (args.length == 1) {
+					p.sendMessage(prefix + "Please specify some arguments!");
+				}
+				else if (args[1] != null) {
+					if(!VillageManager.getManager().isInVillage(p)) {
+						Village vil = VillageManager.getManager().getPlayersVillage(p);
+ 						if(VillageManager.getManager().villageExists(vil.getVillageName())) {
+ 							if(vil.isVillageLeader(p)) {
+ 								VillageManager.getManager().renameVillage(vil.getVillageName(), args[1]);
+ 								p.sendMessage(prefix + "You have renamed your village to " + args[1]);
+ 							}
+ 						}
+					}
+				}
+			}
 		}
 	}
 	return false;

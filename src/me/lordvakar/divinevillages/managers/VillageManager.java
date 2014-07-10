@@ -12,7 +12,9 @@ import me.lordvakar.divinevillages.DivineVillages;
 import me.lordvakar.divinevillages.objects.Village;
 import me.lordvakar.divinevillages.util.Util;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -29,10 +31,10 @@ public class VillageManager
 	Date date = new Date();
 	String dateString = dateFormat.format(date);
 
-	private static VillageManager am = new VillageManager();
+	private static VillageManager vm = new VillageManager();
 	
 	public static VillageManager getManager() {
-		return am;
+		return vm;
 	}
 	
     public Village getVillage(String villageName) {
@@ -72,7 +74,7 @@ public class VillageManager
 				villageConfig.set(path + "villageLeader", villageLeader.getName());
 				villageConfig.set(path + "villageCreationDate", dateString);
 				villageConfig.set(path + "villageOpen", true);
-				//TODO: JUM JUM JUM villageSpawn
+				villageConfig.set(path + "villageSpawn", serializeLoc(villageLeader.getLocation()));
 				villageConfig.save(villageFile);
 				villageConfig.load(villageFile);
 			} catch (IOException e) {
@@ -91,6 +93,7 @@ public class VillageManager
 				villageConfig.set(path + "villageLeader", villageLeader.getName());
 				villageConfig.set(path + "villageCreationDate", dateString);
 		 		villageConfig.set(path + "villageOpen", true);
+				villageConfig.set(path + "villageSpawn", serializeLoc(villageLeader.getLocation()));
 				villageConfig.save(villageFile);
 				villageConfig.load(villageFile);
 			} catch (IOException e) {
@@ -180,12 +183,14 @@ public class VillageManager
     		String villageCreationDate = yml.getString(path + "villageCreationDate");
     		Player leaderPlayerObject = Util.getPlayer(villageLeader);
     		boolean villageOpen = yml.getBoolean(path + "villageOpen");
+			Location villageSpawn = deserializeLoc(yml.getString(path + "villageSpawn"));
     		Village v = new Village(villageName, villageDesc, leaderPlayerObject);
     		v.setVillageName(villageName);
     		v.setVillageDesc(villageDesc);
     		v.setVillageLeader(leaderPlayerObject);
     		v.setVillageCreationDate(villageCreationDate);
     		v.setOpen(villageOpen);
+    		v.setVillageSpawn(villageSpawn);
     		try {
 				yml.save(f);
 				yml.load(f);
@@ -205,6 +210,58 @@ public class VillageManager
 			return false;
 		}
 	}
+	
+	public void renameVillage(String oldName, String newName)
+	{
+		//Could of just set the village name and played with the config..
+		//but then I would of had to change the file name...
+		//Nah, I'll just make a new file ;3
+		
+		//Old villageFile
+		File villageFile = new File("plugins/DivineVillages/Villages" + "/" + oldName + ".yml");
+		YamlConfiguration villageConfig = YamlConfiguration.loadConfiguration(villageFile);
+    	
+    	//Get oldVillageFileInfo
+		String path = oldName + ".";
+    	String villageName = newName;
+		String villageDesc = villageConfig.getString(path + "villageDesc");
+		String villageLeader = villageConfig.getString(path + "villageLeader");
+		String villageCreationDate = villageConfig.getString(path + "villageCreationDate");
+		Player leaderPlayerObject = Util.getPlayer(villageLeader);
+		boolean villageOpen = villageConfig.getBoolean(path + "villageOpen");
+		Location villageSpawn = deserializeLoc(villageConfig.getString(path + "villageSpawn"));
+		removeVillage(oldName);
+		
+		//New Village
+		Village v = new Village(villageName, villageDesc, leaderPlayerObject);
+		v.setVillageName(villageName);
+		v.setVillageDesc(villageDesc);
+		v.setVillageLeader(leaderPlayerObject);
+		v.setVillageCreationDate(villageCreationDate);
+		v.setOpen(villageOpen);
+		v.setVillageSpawn(villageSpawn);
+    	File newVillageFile = new File("plugins/DivineVillages/Villages" + "/" + newName + ".yml");
+    	YamlConfiguration newVillageConfig = YamlConfiguration.loadConfiguration(villageFile);
+		try {
+			newVillageFile.createNewFile();
+			String newPath = villageName + ".";
+			newVillageConfig.set(newPath + "villageName", villageName);
+			newVillageConfig.set(newPath + "villageDesc", villageDesc);
+			newVillageConfig.set(newPath + "villageLeader", villageLeader);
+			newVillageConfig.set(newPath + "villageCreationDate", villageCreationDate);
+			newVillageConfig.set(newPath + "villageOpen", villageOpen);
+			newVillageConfig.set(newPath + "villageSpawn", villageSpawn);
+			newVillageConfig.save(newVillageFile);
+			newVillageConfig.load(newVillageFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InvalidConfigurationException e) {
+			e.printStackTrace();
+		}
+		//DELETE THE OLD CRAP
+	    if (villageFile.exists()) villageFile.delete();
+	    //Wow such a complicated long method for something that seems easy.
+	}
     
     public static void log(Object o) {
         getPlugin().getLogger().info(o.toString());
@@ -213,4 +270,12 @@ public class VillageManager
 	public static JavaPlugin getPlugin() {
 		return plugin;
 	}
+	
+    public String serializeLoc(Location l){
+        return l.getWorld().getName()+","+l.getBlockX()+","+l.getBlockY()+","+l.getBlockZ()+","+l.getPitch()+","+l.getYaw();
+    }
+    public Location deserializeLoc(String s){
+        String[] st = s.split(",");
+        return new Location(Bukkit.getWorld(st[0]), Integer.parseInt(st[1]), Integer.parseInt(st[2]), Integer.parseInt(st[3]) , Float.parseFloat(st[4]), Float.parseFloat(st[5]));
+    }
 }
