@@ -21,6 +21,10 @@ public class Util
         return (Player) o;
     }
     
+    public static Player getPlayer(String s) {
+    	return Bukkit.getPlayer(s);
+    }
+    
     public static OfflinePlayer getOfflinePlayer(Player player) {
         return Bukkit.getOfflinePlayer(player.getName());
     }

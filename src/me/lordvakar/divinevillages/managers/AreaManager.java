@@ -42,8 +42,9 @@ public class AreaManager
 		Player player = Util.getPlayer(playerName);
 		Location chunk = player.getLocation();
 		Area a = getArea(chunk);
+		Village vil = VillageManager.getManager().getPlayersVillage(player);
     	File folder = new File("plugins/DivineVillages/Areas");
-    	File areaFile = new File("plugins/DivineVillages/Areas" + "/" + areaID + ".yml");
+    	File areaFile = new File("plugins/DivineVillages/Areas" + "/" + vil.getVillageName() + ".yml");
     	YamlConfiguration areaConfig = YamlConfiguration.loadConfiguration(areaFile);
 		if(VillageManager.getManager().isInVillage(player)) {
 			//if chunk in not claimed
@@ -52,11 +53,16 @@ public class AreaManager
 					folder.mkdir();
 					try {
 						areaFile.createNewFile();
-						Village vil = VillageManager.getManager().getPlayersVillage(player);
 						Area area = new Area(chunk, vil, areaID);
+						area.setClaimed(true);
 						//Config
-						String path = Integer.toString(areaID) + ".";
+						String path = vil.getVillageName() + "." + areaID;
 						areaConfig.set(path + "areaID", areaID);
+						areaConfig.set(path + "villageOwner", area.getVillageOwner().getVillageName());
+						areaConfig.set(path + "villageX", area.getX());
+						areaConfig.set(path + "villageZ", area.getZ());
+						areaConfig.set(path + "world", area.getWorldName());
+						areaConfig.set(path + "claimed", area.isClaimed());
 						areaConfig.save(areaFile);
 						areaConfig.load(areaFile);
 					} catch (IOException e) {
@@ -64,6 +70,27 @@ public class AreaManager
 					} catch (InvalidConfigurationException e) {
 						e.printStackTrace();
 					}
+				} else if (!areaFile.exists()) {
+					try {
+						areaFile.createNewFile();
+						Area area = new Area(chunk, vil, areaID);
+						area.setClaimed(true);
+						//Config
+						String path = vil.getVillageName() + "." + areaID;
+						areaConfig.set(path + "areaID", areaID);
+						areaConfig.set(path + "villageOwner", area.getVillageOwner().getVillageName());
+						areaConfig.set(path + "villageX", area.getX());
+						areaConfig.set(path + "villageZ", area.getZ());
+						areaConfig.set(path + "world", area.getWorldName());
+						areaConfig.set(path + "claimed", area.isClaimed());
+						areaConfig.save(areaFile);
+						areaConfig.load(areaFile);
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (InvalidConfigurationException e) {
+						e.printStackTrace();
+					}
+				} 	else if(areaFile.exists()) {
 				}
 			} else {
 				player.sendMessage(prefix + "This area is already claimed!");
@@ -74,7 +101,20 @@ public class AreaManager
 	public void unclaimArea(Area area) 
 	{
 		//Config
+    	File areaFile = new File("plugins/DivineVillages/Areas" + "/" + area.getVillageOwner().getVillageName() + ".yml");
+    	YamlConfiguration areaConfig = YamlConfiguration.loadConfiguration(areaFile);
+		String path = area.getVillageOwner().getVillageName() + "." + area.getAreaID();
+		areaConfig.set(path, null);
         areas.remove(getArea(area));
+        try {
+			areaConfig.save(areaFile);
+	        areaConfig.load(areaFile);
+	        areaFile.delete();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InvalidConfigurationException e) {
+			e.printStackTrace();
+		}
 	}
 	
     public Area getArea(Area a) {
@@ -110,42 +150,53 @@ public class AreaManager
 		return a;
     }
     
-    public void loadAllVillages() {
+    public Area getArea(int areaID) {
+        for (Area area : areas) {
+        	if(area.getAreaID() == areaID) {
+        		return area;
+        	} else {
+        		return null;
+        	}
+        }
+    	return null;
+    }
+    
+    public void loadAllAreas() {
     	//If this works, then FUCK YEA!
-    	File folder = new File("plugins/DivineVillages/Villages");
+    	File folder = new File("plugins/DivineVillages/Areas");
         if (!folder.exists()) folder.mkdir();
         File[] villages = folder.listFiles();
         for (File f : villages) {
-          Village v = loadVillage(f);
+          Area v = loadArea(f);
           if (v == null) { Util.log(prefix + "Unable to load " + f.getName() + " as a Village!"); }
         }
     }
     
-    public Village loadVillage(File f) {
+    public Area loadArea(File f) {
     	if (!f.getName().toLowerCase().endsWith(".yml".toLowerCase())) {
     		return null;
     	} else {
     		YamlConfiguration yml = YamlConfiguration.loadConfiguration(f);
-    		
     		String filename = f.getName();
     		int pos = filename.lastIndexOf(".");
     		String justName = pos > 0 ? filename.substring(0, pos) : filename;
-    		
-    		String path = justName + ".";
-    		String villageName = yml.getString(path + "villageName");
-    		String villageDesc = yml.getString(path + "villageDesc");
-    		String villageLeader = yml.getString(path + "villageLeader");
-    		String villageCreationDate = yml.getString(path + "villageCreationDate");
-    		Player leaderPlayerObject = Util.getPlayer(villageLeader);
-    		boolean villageOpen = yml.getBoolean(path + "villageOpen");
-			Location villageSpawn = deserializeLoc(yml.getString(path + "villageSpawn"));
-    		Village v = new Village(villageName, villageDesc, leaderPlayerObject);
-    		v.setVillageName(villageName);
-    		v.setVillageDesc(villageDesc);
-    		v.setVillageLeader(leaderPlayerObject);
-    		v.setVillageCreationDate(villageCreationDate);
-    		v.setOpen(villageOpen);
-    		v.setVillageSpawn(villageSpawn);
+    		int areaID = 0; //INITIZIALIZE TODO:
+            for (Area area : areas) {
+            	if(area.getVillageOwner().getVillageName().equals(justName)) {
+            		areaID = area.getAreaID();
+            	}
+            }
+    		String path = justName + "." + areaID;
+			int configAreaID = yml.getInt(path + "areaID");
+			String villageOwner = yml.getString(path + "villageOwner");
+			int villageX = yml.getInt(path + "villageX");
+			int villageZ = yml.getInt(path + "villageZ");
+			String world = yml.getString(path + "world");
+			boolean claimed = yml.getBoolean(path + "claimed");
+			Village vil = VillageManager.getManager().getPlayersVillage(Util.getPlayer(villageOwner));
+			Location loc = new Location(Bukkit.getWorld(world), villageX, 64, villageZ);
+			Area area = new Area(loc, vil, configAreaID);
+			area.setClaimed(claimed);
     		try {
 				yml.save(f);
 				yml.load(f);
@@ -154,7 +205,7 @@ public class AreaManager
 			} catch (InvalidConfigurationException e) {
 				e.printStackTrace();
 			}
-    		return v;
+    		return area;
     	}
     }
     

@@ -109,7 +109,7 @@ public class VillageManager
     public void removeVillage(String villageName) {
     	File villageFile = new File("plugins/DivineVillages/Villages" + "/" + villageName + ".yml");
     	YamlConfiguration villageConfig = YamlConfiguration.loadConfiguration(villageFile);
-        String path = villageName;
+        String path = villageName + ".";
         villageConfig.set(path, null);
         villages.remove(getVillage(villageName));
 		try {
